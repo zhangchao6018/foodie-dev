@@ -1,6 +1,8 @@
 package com.imooc.controller;
 
+import com.imooc.enums.OrderStatusEnum;
 import com.imooc.enums.PayMethod;
+import com.imooc.pojo.OrderStatus;
 import com.imooc.pojo.bo.SubmitOrderBO;
 import com.imooc.pojo.vo.MerchantOrdersVO;
 import com.imooc.pojo.vo.OrderVO;
@@ -11,10 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,16 +92,16 @@ public class OrdersController extends BaseController {
         return IMOOCJSONResult.ok(orderId);
     }
 
-//    @PostMapping("notifyMerchantOrderPaid")
-//    public Integer notifyMerchantOrderPaid(String merchantOrderId) {
-//        orderService.updateOrderStatus(merchantOrderId, OrderStatusEnum.WAIT_DELIVER.type);
-//        return HttpStatus.OK.value();
-//    }
-//
-//    @PostMapping("getPaidOrderInfo")
-//    public IMOOCJSONResult getPaidOrderInfo(String orderId) {
-//
-//        OrderStatus orderStatus = orderService.queryOrderStatusInfo(orderId);
-//        return IMOOCJSONResult.ok(orderStatus);
-//    }
+    @PostMapping("notifyMerchantOrderPaid")
+    public Integer notifyMerchantOrderPaid(String merchantOrderId) {
+        orderService.updateOrderStatus(merchantOrderId, OrderStatusEnum.WAIT_DELIVER.type);
+        return HttpStatus.OK.value();
+    }
+
+    @PostMapping("getPaidOrderInfo")
+    public IMOOCJSONResult getPaidOrderInfo(String orderId) {
+
+        OrderStatus orderStatus = orderService.queryOrderStatusInfo(orderId);
+        return IMOOCJSONResult.ok(orderStatus);
+    }
 }
