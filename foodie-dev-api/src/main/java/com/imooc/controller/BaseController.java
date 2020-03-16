@@ -22,7 +22,8 @@ public class BaseController {
     // 微信支付成功 -> 支付中心 -> 天天吃货平台
     //                       |-> 回调通知的url
 //    String payReturnUrl = "http://api.z.mukewang.com/foodie-dev-api/orders/notifyMerchantOrderPaid";
-    String payReturnUrl = "http://kcxsfy.natappfree.cc/orders/notifyMerchantOrderPaid";
+    //调用方 支付状态回调路径
+    String payReturnUrl = "http://g4tfub.natappfree.cc/orders/notifyMerchantOrderPaid";
 
     // 用户上传头像的位置
     public static final String IMAGE_USER_FACE_LOCATION = File.separator + "workspaces" +
