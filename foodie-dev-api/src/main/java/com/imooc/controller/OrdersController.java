@@ -8,6 +8,7 @@ import com.imooc.pojo.bo.SubmitOrderBO;
 import com.imooc.pojo.vo.MerchantOrdersVO;
 import com.imooc.pojo.vo.OrderVO;
 import com.imooc.service.OrderService;
+import com.imooc.utils.CookieUtils;
 import com.imooc.utils.IMOOCJSONResult;
 import com.imooc.utils.JsonUtils;
 import com.imooc.utils.RedisOperator;
@@ -56,7 +57,8 @@ public class OrdersController extends BaseController {
             return IMOOCJSONResult.errorMsg("支付方式不支持！");
         }
         //缓存中取出购物车
-        String redisShopCart = redisOperator.get(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
+        String redisKey = FOODIE_SHOPCART+":"+submitOrderBO.getUserId();
+        String redisShopCart = redisOperator.get(redisKey);
         if (StringUtils.isBlank(redisShopCart)){
             return IMOOCJSONResult.errorMsg("购物数据不正确");
         }
@@ -74,8 +76,11 @@ public class OrdersController extends BaseController {
          * 4004
          */
         // TODO 整合redis之后，完善购物车中的已结算商品清除，并且同步到前端的cookie
-        String redisKey = FOODIE_SHOPCART+":"+submitOrderBO.getAddressId();
-//        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, "", true);
+
+        shopcartList.removeAll(orderVO.getToBeRemovedShopcatdList());
+        //重置redis
+        redisOperator.set(redisKey, JsonUtils.objectToJson(shopcartList));
+        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, JsonUtils.objectToJson(shopcartList), true);
 
         // 3. 向支付中心发送当前订单，用于保存支付中心的订单数据
         MerchantOrdersVO merchantOrdersVO = orderVO.getMerchantOrdersVO();

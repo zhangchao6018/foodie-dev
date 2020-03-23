@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,6 +90,8 @@ public class OrderServiceImpl implements OrderService {
         String itemSpecIdArr[] = itemSpecIds.split(",");
         Integer totalAmount = 0;    // 商品原价累计
         Integer realPayAmount = 0;  // 优惠后的实际支付价格累计
+        //待删除的购物车项
+        List<ShopcartBO> toBeRemovedShopcatdList = new ArrayList<>();
         for (String itemSpecId : itemSpecIdArr) {
 
             ShopcartBO cartItem = getBuyCountsFromShopcart(shopcartList, itemSpecId);
@@ -120,6 +123,8 @@ public class OrderServiceImpl implements OrderService {
 
             // 2.4 在用户提交订单以后，规格表中需要扣除库存
             itemService.decreaseItemSpecStock(itemSpecId, buyCounts);
+
+            toBeRemovedShopcatdList.add(cartItem);
         }
 
         newOrder.setTotalAmount(totalAmount);
@@ -144,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = new OrderVO();
         orderVO.setOrderId(orderId);
         orderVO.setMerchantOrdersVO(merchantOrdersVO);
-
+        orderVO.setToBeRemovedShopcatdList(toBeRemovedShopcatdList);
         return orderVO;
     }
 

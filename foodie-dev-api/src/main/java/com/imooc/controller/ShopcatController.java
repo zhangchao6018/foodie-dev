@@ -56,9 +56,9 @@ public class ShopcatController extends BaseController{
                     bo.setBuyCounts(bo.getBuyCounts()+shopcartBO.getBuyCounts());
                     isHaving = true;
                 }
-                if (!isHaving){
-                    shopcartBOS.add(shopcartBO);
-                }
+            }
+            if (!isHaving){
+                shopcartBOS.add(shopcartBO);
             }
         }
 
