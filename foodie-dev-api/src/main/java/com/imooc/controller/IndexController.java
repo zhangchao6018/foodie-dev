@@ -8,15 +8,19 @@ import com.imooc.pojo.vo.NewItemsVO;
 import com.imooc.service.CarouselService;
 import com.imooc.service.CategoryService;
 import com.imooc.utils.IMOOCJSONResult;
+import com.imooc.utils.JsonUtils;
+import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,21 +28,32 @@ import java.util.List;
  * @Author: zhangchao
  * @Date: 2020-03-08 11:37
  **/
-
 @Api(value = "首页", tags = {"首页展示的相关接口"})
 @RestController
 @RequestMapping("index")
-public class IndexController {
+public class IndexController extends BaseController{
     @Autowired
     private CarouselService carouselService;
 
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private RedisOperator redisOperator;
+
     @ApiOperation(value = "获取首页轮播图列表", notes = "获取首页轮播图列表", httpMethod = "GET")
     @GetMapping("/carousel")
     public IMOOCJSONResult carousel() {
-        List<Carousel> list = carouselService.queryAll(YesOrNo.YES.type);
+        List<Carousel> list = new ArrayList<>();
+        //缓存中查询
+        String carousel = redisOperator.get("carousel");
+
+        if (StringUtils.isBlank(carousel)) {
+            list = carouselService.queryAll(YesOrNo.YES.type);
+            redisOperator.set("carousel", JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(carousel, Carousel.class);
+        }
         return IMOOCJSONResult.ok(list);
     }
 
@@ -50,7 +65,16 @@ public class IndexController {
     @ApiOperation(value = "获取商品分类(一级分类)", notes = "获取商品分类(一级分类)", httpMethod = "GET")
     @GetMapping("/cats")
     public IMOOCJSONResult cats() {
-        List<Category> list = categoryService.queryAllRootLevelCat();
+        List<Category> list = new ArrayList<>();
+        String cats = redisOperator.get("cats");
+        if(StringUtils.isBlank(cats)){
+           list = categoryService.queryAllRootLevelCat();
+            //缓存
+           redisOperator.set("cats", JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(cats, Category.class);
+        }
+
         return IMOOCJSONResult.ok(list);
     }
 
@@ -59,12 +83,17 @@ public class IndexController {
     public IMOOCJSONResult subCat(
             @ApiParam(name = "rootCatId", value = "一级分类id", required = true)
             @PathVariable Integer rootCatId) {
-
         if (rootCatId == null) {
             return IMOOCJSONResult.errorMsg("分类不存在");
         }
-
-        List<CategoryVO> list = categoryService.getSubCatList(rootCatId);
+        List<CategoryVO> list = new ArrayList<>();
+        String subCats = redisOperator.get("subCat" + ":" + rootCatId);
+        if (StringUtils.isBlank(subCats)){
+            list = categoryService.getSubCatList(rootCatId);
+            redisOperator.set("subCat" + ":" + rootCatId, JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(subCats, CategoryVO.class);
+        }
         return IMOOCJSONResult.ok(list);
     }
 
