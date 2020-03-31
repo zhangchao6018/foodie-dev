@@ -1,9 +1,11 @@
 package com.imooc.config;
 
+import com.imooc.interceptor.UserTokenInterceptor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -23,4 +25,28 @@ public class WebMvcConfig implements WebMvcConfigurer {
         return builder.build();
     }
 
+
+    @Bean
+    public UserTokenInterceptor userTokenInterceptor() {
+        return new UserTokenInterceptor();
+    }
+
+    //添加拦截器
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+          registry.addInterceptor(userTokenInterceptor())
+                    .addPathPatterns("/hello")
+                    .addPathPatterns("/shopcart/*")
+                    .addPathPatterns("/address/*")
+                    .addPathPatterns("/orders/*")
+                    .addPathPatterns("/center/*")
+                    .addPathPatterns("/userInfo/*")
+                    .addPathPatterns("/myorders/*")
+                    .addPathPatterns("/mycomments/*")
+                    .excludePathPatterns("/myorders/deliver")
+                    .excludePathPatterns("/orders//notifyMerchantOrderPaid")
+
+          ;
+          WebMvcConfigurer.super.addInterceptors(registry);
+    }
 }
