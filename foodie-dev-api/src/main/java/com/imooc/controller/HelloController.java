@@ -25,4 +25,7 @@ public class HelloController {
         session.getAttribute("userInfo");
         return "ok";
     }
+
+
+
 }
