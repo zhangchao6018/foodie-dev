@@ -50,15 +50,15 @@ public class ESTest {
     public void createIndexStu() {
 
         Stu stu = new Stu();
-//        stu.setStuId(1005L);
-//        stu.setName("iron man");
-//        stu.setAge(54);
-//        stu.setMoney(1999.8f);
-//        stu.setSign("I am iron man");
-//        stu.setDescription("I have a iron army");
-        stu.setStuId(1001L);
-        stu.setName("spider man");
-        stu.setAge(17);
+        stu.setStuId(1004L);
+        stu.setName("coll woman");
+        stu.setAge(51);
+        stu.setMoney(999.8f);
+        stu.setSign("I am cool woman");
+        stu.setDescription("I have a cool woman army");
+//        stu.setStuId(1001L);
+//        stu.setName("spider man");
+//        stu.setAge(17);
 
         IndexQuery indexQuery = new IndexQueryBuilder().withObject(stu).build();
         esTemplate.index(indexQuery);
@@ -71,6 +71,9 @@ public class ESTest {
 
 //    ------------------------- 我是分割线 --------------------------------
 
+    /**
+     * 根据_id修改
+     */
     @Test
     public void updateStuDoc() {
 
@@ -84,7 +87,7 @@ public class ESTest {
 
         UpdateQuery updateQuery = new UpdateQueryBuilder()
                                         .withClass(Stu.class)
-                                        .withId("1004")
+                                        .withId("1005")
                                         .withIndexRequest(indexRequest)
                                         .build();
 
@@ -93,17 +96,23 @@ public class ESTest {
         esTemplate.update(updateQuery);
     }
 
+    /**
+     * 根据_id查询文档
+     */
 
     @Test
     public void getStuDoc() {
 
         GetQuery query = new GetQuery();
-        query.setId("1002");
+        query.setId("1005");
         Stu stu = esTemplate.queryForObject(query, Stu.class);
 
         System.out.println(stu);
     }
 
+    /**
+     * 根据_id删除指定文档
+     */
     @Test
     public void deleteStuDoc() {
         esTemplate.delete(Stu.class, "1002");
@@ -112,13 +121,16 @@ public class ESTest {
 
 //    ------------------------- 我是分割线 --------------------------------
 
+    /**
+     * 分页搜索
+     */
     @Test
     public void searchStuDoc() {
 
         Pageable pageable = PageRequest.of(0, 2);
 
         SearchQuery query = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchQuery("description", "save man"))
+                .withQuery(QueryBuilders.matchQuery("description", "army"))
                 .withPageable(pageable)
                 .build();
         AggregatedPage<Stu> pagedStu = esTemplate.queryForPage(query, Stu.class);
@@ -130,6 +142,9 @@ public class ESTest {
 
     }
 
+    /**
+     * 高亮查询+排序
+     */
     @Test
     public void highlightStuDoc() {
 
@@ -144,7 +159,7 @@ public class ESTest {
                 .order(SortOrder.ASC);
 
         SearchQuery query = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchQuery("description", "save man"))
+                .withQuery(QueryBuilders.matchQuery("description", "army"))
                 .withHighlightFields(new HighlightBuilder.Field("description")
                                     .preTags(preTag)
                                     .postTags(postTag))
